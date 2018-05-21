@@ -147,15 +147,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const p = ringFactory.ringToSubmitableParams(ring, feeSelections, feeRecepient);
 
       const ethOfOwnerBefore = await getEthBalanceAsync(owner);
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -205,15 +197,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const p = ringFactory.ringToSubmitableParams(ring, feeSelections, feeRecepient);
 
       const ethOfOwnerBefore = await getEthBalanceAsync(owner);
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       const filled = await tokenTransferDelegate.cancelledOrFilled(ring.orders[0].params.orderHashHex);
@@ -236,15 +220,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const spendableLrcFeeList = [0, 0, 0];
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
 
@@ -286,15 +262,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const spendableLrcFeeList = [0, 5e17, 0];
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       console.log("cumulativeGasUsed for a ring of 2 orders: " + tx.receipt.gasUsed);
@@ -346,15 +314,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
 
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       console.log("cumulativeGasUsed for a ring of 3 orders: " + tx.receipt.gasUsed);
@@ -417,15 +377,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       // await approve([eos, neo, qtum], [order1Owner, order2Owner, order3Owner], availableAmountSList);
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -492,15 +444,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
 
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -560,15 +504,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
 
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -638,15 +574,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
 
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -705,15 +633,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
 
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
-      const tx = await loopringProtocolImpl.submitRing(p.addressList,
-                                                       p.uintArgsList,
-                                                       p.uint8ArgsList,
-                                                       p.buyNoMoreThanAmountBList,
-                                                       p.vList,
-                                                       p.rList,
-                                                       p.sList,
-                                                       p.feeRecepient,
-                                                       p.feeSelections,
+      const tx = await loopringProtocolImpl.submitRing(p.data,
                                                        {from: owner});
 
       // console.log("tx.receipt.logs: ", tx.receipt.logs);
@@ -808,15 +728,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
 
       try {
-        await loopringProtocolImpl.submitRing(p.addressList,
-                                              p.uintArgsList,
-                                              p.uint8ArgsList,
-                                              p.buyNoMoreThanAmountBList,
-                                              p.vList,
-                                              p.rList,
-                                              p.sList,
-                                              p.feeRecepient,
-                                              p.feeSelections,
+        await loopringProtocolImpl.submitRing(p.data,
                                               {from: owner});
       } catch (err) {
         const errMsg = `${err}`;
@@ -848,15 +760,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const p = ringFactory.ringToSubmitableParams(ring, feeSelectionList, feeRecepient);
       await loopringProtocolImpl.cancelAllOrders(new BigNumber(currBlockTimeStamp), {from: order1Owner});
       try {
-        await loopringProtocolImpl.submitRing(p.addressList,
-                                              p.uintArgsList,
-                                              p.uint8ArgsList,
-                                              p.buyNoMoreThanAmountBList,
-                                              p.vList,
-                                              p.rList,
-                                              p.sList,
-                                              p.feeRecepient,
-                                              p.feeSelections,
+        await loopringProtocolImpl.submitRing(p.data,
                                               {from: owner});
       } catch (err) {
         const errMsg = `${err}`;
@@ -973,15 +877,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const ethOfOwnerBefore = await getEthBalanceAsync(owner);
 
       try {
-        await loopringProtocolImpl.submitRing(p.addressList,
-                                              p.uintArgsList,
-                                              p.uint8ArgsList,
-                                              p.buyNoMoreThanAmountBList,
-                                              p.vList,
-                                              p.rList,
-                                              p.sList,
-                                              p.feeRecepient,
-                                              p.feeSelections,
+        await loopringProtocolImpl.submitRing(p.data,
                                               {from: owner});
       } catch (err) {
         const errMsg = `${err}`;
@@ -1028,15 +924,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
       const ethOfOwnerBefore = await getEthBalanceAsync(owner);
 
       try {
-        await loopringProtocolImpl.submitRing(p.addressList,
-                                              p.uintArgsList,
-                                              p.uint8ArgsList,
-                                              p.buyNoMoreThanAmountBList,
-                                              p.vList,
-                                              p.rList,
-                                              p.sList,
-                                              p.feeRecepient,
-                                              p.feeSelections,
+        await loopringProtocolImpl.submitRing(p.data,
                                               {from: owner});
       } catch (err) {
         const errMsg = `${err}`;

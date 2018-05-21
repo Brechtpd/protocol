@@ -466,6 +466,21 @@ export class RingFactory {
     return result;
   }
 
+  public bnToHex(x: BigNumber) {
+    return web3.toHex(x).substring(2).padStart(64, "0");
+  }
+
+  public addressToHex(x: string) {
+    return "000000000000000000000000" + x.substring(2);
+  }
+
+  public padRight(x: string, n: number) {
+    for (let i = 0; i < n; i++) {
+        x = x + "0";
+    }
+    return x;
+  }
+
   public ringToSubmitableParams(ring: Ring,
                                 feeSelectionList: number[],
                                 feeRecepient: string) {
@@ -477,9 +492,20 @@ export class RingFactory {
     const vList: number[] = [];
     const rList: string[] = [];
     const sList: string[] = [];
+    let data = "0x";
 
     const rateAmountSList = this.caculateRateAmountS(ring);
     // console.log("rateAmountSList", rateAmountSList);
+
+    const ringSizeHex = this.bnToHex(new BigNumber(ringSize));
+    const feeSelectionHex = this.bnToHex(new BigNumber(this.feeSelectionListToNumber(feeSelectionList)));
+    const feeRecipientHex = this.addressToHex(feeRecepient);
+
+    let ringHeaderData = "";
+    ringHeaderData += ringSizeHex.substring(64 - 2);
+    ringHeaderData += feeSelectionHex.substring(64 - 4);
+    ringHeaderData += feeRecipientHex.substring(64 - 40);
+    data += this.padRight(ringHeaderData, 64 - ringHeaderData.length);
 
     for (let i = 0; i < ringSize; i++) {
       const order = ring.orders[i];
@@ -510,7 +536,33 @@ export class RingFactory {
       vList.push(order.params.v);
       rList.push(order.params.r);
       sList.push(order.params.s);
+
+      data += this.addressToHex(order.owner);
+      data += this.addressToHex(order.params.tokenS);
+      data += this.addressToHex(order.params.walletAddr);
+      data += this.addressToHex(order.params.authAddr);
+
+      data += this.bnToHex(order.params.validSince);
+      data += this.bnToHex(order.params.validUntil);
+      data += this.bnToHex(order.params.amountS);
+      data += this.bnToHex(order.params.amountB);
+      data += this.bnToHex(order.params.lrcFee);
+      data += this.bnToHex(rateAmountSList[i]);
+
+      data += ring.authR[i].substring(2);
+      data += ring.authS[i].substring(2);
+
+      data += order.params.r.substring(2);
+      data += order.params.s.substring(2);
+
+      let packedData = 0;
+      packedData += (order.params.v << 16);
+      packedData += (ring.authV[i] << 8);
+      packedData += ((order.params.buyNoMoreThanAmountB ? 1 : 0) << 7) + order.params.marginSplitPercentage;
+      data += this.bnToHex(new BigNumber(packedData)).substring(58);
     }
+
+    // console.log("Data: ", data);
 
     vList.push(...ring.authV);
     rList.push(...ring.authR);
@@ -531,6 +583,7 @@ export class RingFactory {
       ringOwner: ring.owner,
       feeRecepient,
       feeSelections: this.feeSelectionListToNumber(feeSelectionList),
+      data,
     };
 
     return submitParams;
