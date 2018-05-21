@@ -1,4 +1,5 @@
 import { BigNumber } from "bignumber.js";
+import ethUtil = require("ethereumjs-util");
 import { LoopringSubmitParams, OrderParams } from "../util/types";
 import { Order } from "./order";
 import { Ring } from "./ring";
@@ -481,6 +482,17 @@ export class RingFactory {
     return x;
   }
 
+  public addressXOR(s1: string, s2: string) {
+    const buf1 = Buffer.from(s1.slice(2), "hex");
+    const buf2 = Buffer.from(s2.slice(2), "hex");
+    const res = Buffer.alloc(32);
+    for (let i = 0; i < 32; i++) {
+      res[i] = buf1[i] ^ buf2[i];
+    }
+    const strRes = ethUtil.bufferToHex(res);
+    return strRes;
+  }
+
   public ringToSubmitableParams(ring: Ring,
                                 feeSelectionList: number[],
                                 feeRecepient: string) {
@@ -537,10 +549,25 @@ export class RingFactory {
       rList.push(order.params.r);
       sList.push(order.params.s);
 
+      let authAddrHex = this.addressToHex(order.params.authAddr);
+      let walletAddrHex = this.addressToHex(order.params.walletAddr);
+      let ringAuthRHex = ring.authR[i].substring(2);
+      let ringAuthSHex = ring.authS[i].substring(2);
+      let ringAuthV = ring.authV[i];
+      if (i > 0) {
+        // Do some simple XOR compression
+        const previousOrder = ring.orders[i - 1];
+        authAddrHex = this.addressXOR(previousOrder.params.authAddr, order.params.authAddr).slice(2);
+        walletAddrHex = this.addressXOR(previousOrder.params.walletAddr, order.params.walletAddr).slice(2);
+        ringAuthRHex = this.addressXOR(ring.authR[i - 1], ring.authR[i]).slice(2);
+        ringAuthSHex = this.addressXOR(ring.authS[i - 1], ring.authS[i]).slice(2);
+        ringAuthV = ring.authV[i - 1] ^ ring.authV[i];
+      }
+
       data += this.addressToHex(order.owner);
       data += this.addressToHex(order.params.tokenS);
-      data += this.addressToHex(order.params.walletAddr);
-      data += this.addressToHex(order.params.authAddr);
+      data += walletAddrHex;
+      data += authAddrHex;
 
       data += this.bnToHex(order.params.validSince);
       data += this.bnToHex(order.params.validUntil);
@@ -549,15 +576,15 @@ export class RingFactory {
       data += this.bnToHex(order.params.lrcFee);
       data += this.bnToHex(rateAmountSList[i]);
 
-      data += ring.authR[i].substring(2);
-      data += ring.authS[i].substring(2);
+      data += ringAuthRHex;
+      data += ringAuthSHex;
 
       data += order.params.r.substring(2);
       data += order.params.s.substring(2);
 
       let packedData = 0;
       packedData += (order.params.v << 16);
-      packedData += (ring.authV[i] << 8);
+      packedData += (ringAuthV << 8);
       packedData += ((order.params.buyNoMoreThanAmountB ? 1 : 0) << 7) + order.params.marginSplitPercentage;
       data += this.bnToHex(new BigNumber(packedData)).substring(58);
     }
