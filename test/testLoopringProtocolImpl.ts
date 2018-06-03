@@ -310,7 +310,7 @@ contract("LoopringProtocolImpl", (accounts: string[]) => {
                                ringInfo.spendableAmountSList,
                                ringInfo.spendableLrcFeeAmountList);
 
-        const p = ringFactory.ringToSubmitableParams(ring);
+        const p = ringFactory.ringsToSubmitableParams([ring]);
 
         const simulator = new ProtocolSimulator(ring,
                                                 lrcAddress,

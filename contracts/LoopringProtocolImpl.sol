@@ -63,6 +63,8 @@ contract LoopringProtocolImpl is LoopringProtocol {
 
     uint    public constant RING_HEADER_SIZE    = 23;
 
+    uint    public constant RING_ORDER_SIZE     = 395;
+
     /// @param orderHash    The order's hash
     /// @param feeSelection -
     ///                     A miner-supplied value indicating if LRC (value = 0)
@@ -277,39 +279,52 @@ contract LoopringProtocolImpl is LoopringProtocol {
         uint64 _ringIndex = ringIndex;
         ringIndex |= (1 << 63);
 
-        // Setup the ring parameters
-        RingParams memory params = setupRingParams(data);
+        // Read num rings from call data
+        require(data.length >= 1);
+        uint numRings = uint(data[0]);
 
-        // Assemble input data into structs so we can pass them to other functions.
-        // This method also calculates ringHash, therefore it must be called before
-        // calling `verifyRingSignatures`.
-        TokenTransferDelegate delegate = TokenTransferDelegate(delegateAddress);
-        OrderState[] memory orders = assembleOrders(
-            params,
-            data
-        );
+        uint dataOffset = 1;
+        for(uint i = 0; i < numRings; i++) {
 
-        verifyRingSignatures(params, orders);
+            // Setup the ring parameters
+            RingParams memory params = setupRingParams(data, dataOffset);
 
-        verifyTokensRegistered(params, orders);
+            // Assemble input data into structs so we can pass them to other functions.
+            // This method also calculates ringHash, therefore it must be called before
+            // calling `verifyRingSignatures`.
+            TokenTransferDelegate delegate = TokenTransferDelegate(delegateAddress);
+            OrderState[] memory orders = assembleOrders(
+                params,
+                data,
+                dataOffset
+            );
 
-        handleRing(_ringIndex, params, orders, delegate);
+            verifyRingSignatures(params, orders);
 
-        ringIndex = _ringIndex + 1;
+            verifyTokensRegistered(params, orders);
+
+            handleRing(_ringIndex, params, orders, delegate);
+
+            dataOffset += RING_HEADER_SIZE + params.ringSize * RING_ORDER_SIZE;
+            _ringIndex++;
+        }
+
+        ringIndex = _ringIndex;
     }
 
     /// @dev extract the ring parameter values
     /// @return     The ring parameters
     function setupRingParams(
-        bytes data
+        bytes data,
+        uint dataOffset
         )
         private
         pure
         returns (RingParams memory params)
     {
         // Read ring header from call data
-        require(data.length >= RING_HEADER_SIZE);
-        uint ringHeader = MemoryUtil.bytesToUint(data, 0);
+        require(data.length >= dataOffset + RING_HEADER_SIZE);
+        uint ringHeader = MemoryUtil.bytesToUint(data, dataOffset);
 
         // Extract data from ring header
         params.ringSize = uint8(ringHeader >> 248);
@@ -326,17 +341,18 @@ contract LoopringProtocolImpl is LoopringProtocol {
     /// @return     A list of orders.
     function assembleOrders(
         RingParams params,
-        bytes data
+        bytes data,
+        uint dataOffset
         )
         private
         view
         returns (OrderState[] memory orders)
     {
-        uint offset = RING_HEADER_SIZE;
-        uint orderSize = 395;
+        uint offset = dataOffset + RING_HEADER_SIZE;
+        uint orderSize = RING_ORDER_SIZE;
 
         // Validate the data size
-        require(data.length == offset + orderSize * params.ringSize);
+        require(data.length >= offset + orderSize * params.ringSize);
 
         orders = new OrderState[](params.ringSize);
 

@@ -53,52 +53,57 @@ export class RingFactory {
     return ring;
   }
 
-  public ringToSubmitableParams(ring: Ring) {
-    const ringSize = ring.orders.length;
-    ring.caculateAndSetRateAmount();
+  public ringsToSubmitableParams(rings: Ring[]) {
+    const numRings = rings.length;
 
     const bitstream = new Bitstream();
+    bitstream.addNumber(numRings, 1);
+    for (let n = 0; n < numRings; n++) {
+      const ring = rings[n];
+      const ringSize = ring.orders.length;
+      ring.caculateAndSetRateAmount();
 
-    bitstream.addNumber(ringSize, 1);
-    bitstream.addAddress(ring.owner);
-    bitstream.addNumber(this.feeSelectionListToNumber(ring.feeSelections), 2);
+      bitstream.addNumber(ringSize, 1);
+      bitstream.addAddress(ring.owner);
+      bitstream.addNumber(this.feeSelectionListToNumber(ring.feeSelections), 2);
 
-    for (let i = 0; i < ringSize; i++) {
-      const order = ring.orders[i];
+      for (let i = 0; i < ringSize; i++) {
+        const order = ring.orders[i];
 
-      let authAddr = order.params.authAddr;
-      let walletAddr = order.params.walletAddr;
-      let ringAuthR = ring.authR[i];
-      let ringAuthS = ring.authS[i];
-      let ringAuthV = ring.authV[i];
-      if (i > 0) {
-        const previousOrder = ring.orders[i - 1];
+        let authAddr = order.params.authAddr;
+        let walletAddr = order.params.walletAddr;
+        let ringAuthR = ring.authR[i];
+        let ringAuthS = ring.authS[i];
+        let ringAuthV = ring.authV[i];
+        if (i > 0) {
+          const previousOrder = ring.orders[i - 1];
 
-        // Do simple XOR compression using values of the previous order
-        authAddr = this.xor(previousOrder.params.authAddr, order.params.authAddr, 20);
-        walletAddr = this.xor(previousOrder.params.walletAddr, order.params.walletAddr, 20);
-        ringAuthR = this.xor(ring.authR[i - 1], ring.authR[i], 32);
-        ringAuthS = this.xor(ring.authS[i - 1], ring.authS[i], 32);
-        ringAuthV = ring.authV[i - 1] ^ ring.authV[i];
+          // Do simple XOR compression using values of the previous order
+          authAddr = this.xor(previousOrder.params.authAddr, order.params.authAddr, 20);
+          walletAddr = this.xor(previousOrder.params.walletAddr, order.params.walletAddr, 20);
+          ringAuthR = this.xor(ring.authR[i - 1], ring.authR[i], 32);
+          ringAuthS = this.xor(ring.authS[i - 1], ring.authS[i], 32);
+          ringAuthV = ring.authV[i - 1] ^ ring.authV[i];
+        }
+
+        bitstream.addAddress(order.owner, 32);
+        bitstream.addAddress(order.params.tokenS, 32);
+        bitstream.addAddress(walletAddr, 32);
+        bitstream.addAddress(authAddr, 32);
+        bitstream.addBigNumber(order.params.amountS);
+        bitstream.addBigNumber(order.params.amountB);
+        bitstream.addBigNumber(order.params.lrcFee);
+        bitstream.addBigNumber(new BigNumber(order.params.rateAmountS.toPrecision(15)), 32);
+        bitstream.addHex(order.params.r);
+        bitstream.addHex(order.params.s);
+        bitstream.addHex(ringAuthR);
+        bitstream.addHex(ringAuthS);
+        bitstream.addBigNumber(order.params.validSince, 4);
+        bitstream.addBigNumber(order.params.validUntil.minus(order.params.validSince), 4);
+        bitstream.addNumber(order.params.v, 1);
+        bitstream.addNumber(ringAuthV, 1);
+        bitstream.addNumber(((order.params.buyNoMoreThanAmountB ? 1 : 0) << 7) + order.params.marginSplitPercentage, 1);
       }
-
-      bitstream.addAddress(order.owner, 32);
-      bitstream.addAddress(order.params.tokenS, 32);
-      bitstream.addAddress(walletAddr, 32);
-      bitstream.addAddress(authAddr, 32);
-      bitstream.addBigNumber(order.params.amountS);
-      bitstream.addBigNumber(order.params.amountB);
-      bitstream.addBigNumber(order.params.lrcFee);
-      bitstream.addBigNumber(new BigNumber(order.params.rateAmountS.toPrecision(15)), 32);
-      bitstream.addHex(order.params.r);
-      bitstream.addHex(order.params.s);
-      bitstream.addHex(ringAuthR);
-      bitstream.addHex(ringAuthS);
-      bitstream.addBigNumber(order.params.validSince, 4);
-      bitstream.addBigNumber(order.params.validUntil.minus(order.params.validSince), 4);
-      bitstream.addNumber(order.params.v, 1);
-      bitstream.addNumber(ringAuthV, 1);
-      bitstream.addNumber(((order.params.buyNoMoreThanAmountB ? 1 : 0) << 7) + order.params.marginSplitPercentage, 1);
     }
 
     const submitParams = {
